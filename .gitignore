@@ -1,0 +1,28 @@
+# Installed Electron runtime / packaged app files
+/*.dll
+/*.exe
+/*.pak
+/*.bin
+/*.dat
+/*.json
+/*.html
+/*.txt
+/*.ico
+/locales/
+/resources/elevate.exe
+
+# Local install marker
+/.mineradio-install-root
+
+# App dependencies and generated output
+/resources/app/node_modules/
+/resources/app/dist/
+/resources/app/out/
+/resources/app/.vite/
+/resources/app/.cache/
+
+# Logs and local environment
+*.log
+*.bundle
+.env
+.env.*
