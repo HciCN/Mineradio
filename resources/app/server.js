@@ -59,6 +59,10 @@ const {
   getAnySourceSongUrl,
   getAnySourceLyric,
 } = require('./anysource-gdstudio');
+const {
+  listWallpaperEngineItems,
+  resolveWallpaperEngineMedia,
+} = require('./wallpaper-engine');
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -210,6 +214,47 @@ function sendJSON(res, data, status) {
     'Expires': '0',
   });
   res.end(JSON.stringify(data));
+}
+function streamLocalVideo(req, res, media) {
+  let stat;
+  try {
+    stat = fs.statSync(media.path);
+  } catch (e) {
+    res.writeHead(404);
+    res.end('Not Found');
+    return;
+  }
+  const size = stat.size;
+  const range = req.headers.range || '';
+  const baseHeaders = {
+    'Content-Type': media.mime || 'application/octet-stream',
+    'Accept-Ranges': 'bytes',
+    'Access-Control-Allow-Origin': '*',
+    'Cache-Control': 'public, max-age=3600',
+  };
+  if (range) {
+    const m = String(range).match(/^bytes=(\d*)-(\d*)$/);
+    if (!m) {
+      res.writeHead(416, Object.assign({}, baseHeaders, { 'Content-Range': 'bytes */' + size }));
+      res.end();
+      return;
+    }
+    const start = m[1] ? Number(m[1]) : 0;
+    const end = m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start > end || start >= size) {
+      res.writeHead(416, Object.assign({}, baseHeaders, { 'Content-Range': 'bytes */' + size }));
+      res.end();
+      return;
+    }
+    res.writeHead(206, Object.assign({}, baseHeaders, {
+      'Content-Length': end - start + 1,
+      'Content-Range': 'bytes ' + start + '-' + end + '/' + size,
+    }));
+    fs.createReadStream(media.path, { start, end }).pipe(res);
+    return;
+  }
+  res.writeHead(200, Object.assign({}, baseHeaders, { 'Content-Length': size }));
+  fs.createReadStream(media.path).pipe(res);
 }
 function readPackageInfo() {
   try {
@@ -4218,6 +4263,36 @@ const server = http.createServer(async (req, res) => {
     } catch (err) {
       console.error('[PlaylistTracks]', err);
       sendJSON(res, { error: err.message, tracks: [] }, 500);
+    }
+    return;
+  }
+
+  // ---------- Wallpaper Engine 视频壁纸导入 ----------
+  if (pn === '/api/wallpaper-engine/list') {
+    try {
+      const items = listWallpaperEngineItems();
+      sendJSON(res, {
+        items,
+        playableCount: items.filter(item => item.playable).length,
+        total: items.length,
+      });
+    } catch (err) {
+      console.error('[WallpaperEngineList]', err);
+      sendJSON(res, { error: err.message, items: [], playableCount: 0, total: 0 }, 500);
+    }
+    return;
+  }
+
+  if (pn === '/api/wallpaper-engine/media') {
+    try {
+      const id = url.searchParams.get('id');
+      if (!id) { res.writeHead(400); res.end('Missing id'); return; }
+      const media = resolveWallpaperEngineMedia(id);
+      streamLocalVideo(req, res, media);
+    } catch (err) {
+      console.error('[WallpaperEngineMedia]', err.message);
+      res.writeHead(/not found/i.test(err.message) ? 404 : 415, { 'Access-Control-Allow-Origin': '*' });
+      res.end(err.message);
     }
     return;
   }

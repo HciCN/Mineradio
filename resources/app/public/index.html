@@ -1124,8 +1124,18 @@ body.desktop-shell.diy-mode #bottom-bar.stage-mode{left:50%;width:min(1080px,cal
 .lyric-swatch.auto{background:linear-gradient(135deg,rgba(143,233,255,.52),rgba(156,255,223,.36),rgba(244,210,138,.42));display:flex;align-items:center;justify-content:center;color:rgba(8,10,12,.78);font-size:9px;font-weight:800;letter-spacing:.5px}
 .lyric-color-row{display:grid;grid-template-columns:42px 1fr 68px;align-items:center;gap:9px;margin:7px 0 9px;padding:8px 9px;border-radius:12px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.026)}
 .lyric-color-row.visual-tint-row{grid-template-columns:42px 1fr 58px 58px}
-.lyric-color-row.image-pick-row{grid-template-columns:64px 1fr 68px}
+.lyric-color-row.image-pick-row{grid-template-columns:56px 1fr 52px 58px}
 .lyric-color-row.image-pick-row .fx-mini-btn{min-width:0;display:flex;align-items:center;justify-content:center;white-space:nowrap;padding:0 8px;line-height:1}
+.wallpaper-engine-modal{width:min(620px,92vw);max-width:min(620px,92vw);max-height:min(720px,calc(100vh - 72px));padding:24px;text-align:left;display:flex;flex-direction:column;overflow:hidden}
+.wallpaper-engine-modal h2{text-align:center;margin-bottom:10px}
+.wallpaper-engine-note{font-size:12px;line-height:1.55;color:rgba(255,255,255,.52);margin:0 0 14px;text-align:center}
+.wallpaper-engine-list{display:flex;flex-direction:column;gap:8px;overflow:auto;padding-right:3px;scrollbar-width:none}
+.wallpaper-engine-list::-webkit-scrollbar{width:0;height:0}
+.wallpaper-engine-item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035)}
+.wallpaper-engine-item.disabled{opacity:.52}
+.wallpaper-engine-title{font-size:13px;color:rgba(255,255,255,.88);line-height:1.35;word-break:break-word}
+.wallpaper-engine-meta{font-size:10.5px;color:rgba(255,255,255,.44);margin-top:4px;letter-spacing:.03em}
+.wallpaper-engine-empty{padding:22px 10px;text-align:center;color:rgba(255,255,255,.5);font-size:12px;line-height:1.55}
 .lyric-color-picker{width:42px;height:32px;padding:0;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.045);cursor:pointer;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 10px 22px rgba(0,0,0,.18);transition:border-color .18s,box-shadow .18s,transform .18s;pointer-events:none}
 .lyric-color-picker:hover{border-color:rgba(var(--fc-accent-rgb),.34);box-shadow:0 0 0 1px rgba(var(--fc-accent-rgb),.12),0 10px 24px rgba(0,0,0,.22)}
 .lyric-color-picker::-webkit-color-swatch-wrapper{padding:0}
@@ -2070,6 +2080,7 @@ html.control-glass-svg-ok #visual-guide-btn:hover{
   <div class="lyric-color-row image-pick-row">
     <button class="fx-mini-btn ghost" type="button" onclick="document.getElementById('background-image-input').click()">选择</button>
     <div class="fx-color-row-label">背景媒体<small id="bg-image-value">未设置</small></div>
+    <button class="fx-mini-btn ghost" type="button" onclick="openWallpaperEnginePicker()">WE</button>
     <button class="fx-mini-btn ghost" type="button" onclick="clearCustomBackgroundImage()">清除</button>
   </div>
   <div class="fx-slider"><label>背景透明度</label><input id="fx-bgopacity" type="range" min="0" max="1" step="0.01"><output></output></div>
@@ -2457,6 +2468,17 @@ html.control-glass-svg-ok #visual-guide-btn:hover{
 
 <input type="file" id="file-input" accept=".mp3,.flac,.wav,.ogg,.m4a,.jpg,.jpeg,.png,.webp" multiple style="display:none">
 <input type="file" id="background-image-input" accept=".jpg,.jpeg,.png,.webp,.mp4,.webm,.mov,image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" style="display:none">
+<div id="wallpaper-engine-modal" class="modal-mask">
+  <div class="modal wallpaper-engine-modal">
+    <h2>Wallpaper Engine</h2>
+    <div class="wallpaper-engine-note" id="wallpaper-engine-note">Video wallpapers can be used directly. Scene wallpapers need to be exported or recorded as video first.</div>
+    <div class="wallpaper-engine-list" id="wallpaper-engine-list"></div>
+    <div class="btn-row">
+      <button class="modal-btn" type="button" onclick="closeWallpaperEnginePicker()">关闭</button>
+      <button class="modal-btn primary" type="button" onclick="loadWallpaperEngineItems(true)">刷新</button>
+    </div>
+  </div>
+</div>
 <div id="drop-overlay"><div class="drop-text">拖放音乐或封面</div></div>
 <div id="free-camera-hint"><b>自由镜头</b> R 固定/退出 · WASD 移动 · 鼠标转向 · Shift 加速 · Space/Ctrl 升降 · Q/E 轻微旋转 · 滚轮景深 · K 回正</div>
 <div id="loading-overlay"><div class="spinner"></div></div>
@@ -7974,7 +7996,7 @@ function normalizeCustomBackgroundMedia(value) {
   if (type === 'video') {
     var src = String(value.src || '').trim();
     var id = String(value.id || '').trim();
-    if (!id && !/^data:video\/(mp4|webm|quicktime);base64,/i.test(src) && !/^https?:\/\//i.test(src)) return null;
+    if (!id && !/^data:video\/(mp4|webm|quicktime);base64,/i.test(src) && !/^https?:\/\//i.test(src) && !/^\/api\/wallpaper-engine\/media\?/i.test(src)) return null;
     return {
       type: 'video',
       id: id,
@@ -21047,6 +21069,78 @@ function readBackgroundMediaFile(file) {
   if (/^image\//i.test(file.type || '')) readBackgroundImageFile(file);
   else if (/^video\//i.test(file.type || '')) readBackgroundVideoFile(file);
   else showToast('请选择图片或视频文件');
+}
+var wallpaperEngineItems = [];
+function safeUiText(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch){
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+  });
+}
+function openWallpaperEnginePicker() {
+  var modal = document.getElementById('wallpaper-engine-modal');
+  if (modal) modal.classList.add('show');
+  loadWallpaperEngineItems(false);
+}
+function closeWallpaperEnginePicker() {
+  var modal = document.getElementById('wallpaper-engine-modal');
+  if (modal) modal.classList.remove('show');
+}
+function renderWallpaperEngineItems(items, loadingText) {
+  var list = document.getElementById('wallpaper-engine-list');
+  var note = document.getElementById('wallpaper-engine-note');
+  if (!list) return;
+  if (loadingText) {
+    list.innerHTML = '<div class="wallpaper-engine-empty">' + safeUiText(loadingText) + '</div>';
+    return;
+  }
+  items = Array.isArray(items) ? items : [];
+  var playableCount = items.filter(function(item){ return item && item.playable; }).length;
+  if (note) note.textContent = items.length ? ('可直接使用 ' + playableCount + ' 个视频壁纸；Scene / Web 壁纸需要先导出或录制成视频。') : '未找到 Wallpaper Engine 壁纸库。';
+  if (!items.length) {
+    list.innerHTML = '<div class="wallpaper-engine-empty">没有找到已安装的 Wallpaper Engine 壁纸。确认 Steam 和 Wallpaper Engine 已安装后再刷新。</div>';
+    return;
+  }
+  list.innerHTML = items.map(function(item){
+    var disabled = !item.playable;
+    var action = disabled
+      ? '<button class="modal-btn" type="button" disabled>需导出</button>'
+      : '<button class="modal-btn primary" type="button" onclick="applyWallpaperEngineBackground(\'' + safeUiText(item.id) + '\')">使用</button>';
+    var meta = (item.kind || item.type || 'unknown') + (item.sizeLabel ? ' · ' + item.sizeLabel : '') + (item.fileName ? ' · ' + item.fileName : '');
+    return '<div class="wallpaper-engine-item' + (disabled ? ' disabled' : '') + '">'
+      + '<div><div class="wallpaper-engine-title">' + safeUiText(item.title || 'Wallpaper Engine') + '</div>'
+      + '<div class="wallpaper-engine-meta">' + safeUiText(meta) + '</div></div>'
+      + action
+      + '</div>';
+  }).join('');
+}
+async function loadWallpaperEngineItems(forceToast) {
+  renderWallpaperEngineItems([], '正在读取 Wallpaper Engine 壁纸库...');
+  try {
+    var resp = await fetch('/api/wallpaper-engine/list');
+    var data = await resp.json();
+    wallpaperEngineItems = Array.isArray(data.items) ? data.items : [];
+    renderWallpaperEngineItems(wallpaperEngineItems);
+    if (forceToast) showToast('已刷新 Wallpaper Engine 壁纸库');
+  } catch (err) {
+    console.warn('Wallpaper Engine list failed:', err);
+    renderWallpaperEngineItems([], '读取失败，请确认 Wallpaper Engine 安装路径可访问。');
+    showToast('Wallpaper Engine 壁纸库读取失败');
+  }
+}
+function applyWallpaperEngineBackground(id) {
+  var item = (wallpaperEngineItems || []).find(function(entry){ return entry && entry.id === id; });
+  if (!item || !item.playable || !item.mediaUrl) {
+    showToast('这个壁纸需要先导出或录制成视频');
+    return;
+  }
+  setCustomBackgroundMedia({
+    type: 'video',
+    src: item.mediaUrl,
+    name: item.title || item.fileName || 'Wallpaper Engine',
+    mime: 'video/mp4',
+    size: item.size || 0
+  });
+  closeWallpaperEnginePicker();
 }
 function applyUiAccentColor() {
   var color = normalizeHexColor(fx.uiAccentColor || '#00f5d4', '#00f5d4');
