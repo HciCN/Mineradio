@@ -63,3 +63,8 @@ test('Any Listen playback URL cover is written back before visual load', () => {
   assert(playQueueAtBody.includes('song.anySourceMusicInfo.meta.picUrl = data.cover'));
   assert(playQueueAtBody.includes('loadCoverFromUrl(songCoverSrc(song, 400)'));
 });
+
+test('Wallpaper Engine background import has a visible entry point', () => {
+  assert(html.includes('openWallpaperEnginePicker()'));
+  assert(html.includes('壁纸引擎'));
+});
