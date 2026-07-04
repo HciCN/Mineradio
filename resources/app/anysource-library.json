@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "playlists": [
+    {
+      "id": "heard",
+      "name": "我听过的 ANY",
+      "createdAt": 1783158928717,
+      "updatedAt": 1783162362953,
+      "trackKeys": [
+        "gdstudio|joox|39rIjvMl8HO+XEHDtgsiDA==",
+        "gdstudio|netease|215382",
+        "gdstudio|netease|3382785086",
+        "gdstudio|netease|1973665667"
+      ]
+    }
+  ],
+  "songs": {
+    "gdstudio|netease|1973665667": {
+      "provider": "anysource",
+      "type": "song",
+      "source": "gdstudio:netease",
+      "id": "1973665667",
+      "anySourceProvider": "gdstudio",
+      "anySource": "netease",
+      "anySourceLabel": "GD 网易云音乐",
+      "anySourceMusicInfo": {
+        "id": "1973665667",
+        "name": "海屿你",
+        "singer": "马也_Crabbit",
+        "interval": "",
+        "isLocal": false,
+        "meta": {
+          "musicId": "1973665667",
+          "albumName": "海屿你",
+          "picUrl": "https://p2.music.126.net/Enhy6dPn4gpyqrKhVEQvgA==/109951170483249998.jpg?param=500y500",
+          "source": "netease",
+          "_picId": "109951170483249998"
+        }
+      },
+      "name": "海屿你",
+      "artist": "马也_Crabbit",
+      "artists": [
+        {
+          "name": "马也_Crabbit"
+        }
+      ],
+      "album": "海屿你",
+      "cover": "https://p2.music.126.net/Enhy6dPn4gpyqrKhVEQvgA==/109951170483249998.jpg?param=500y500",
+      "duration": 0,
+      "fee": 0
+    },
+    "gdstudio|netease|3382785086": {
+      "provider": "anysource",
+      "type": "song",
+      "source": "gdstudio:netease",
+      "id": "3382785086",
+      "anySourceProvider": "gdstudio",
+      "anySource": "netease",
+      "anySourceLabel": "GD 网易云音乐",
+      "anySourceMusicInfo": {
+        "id": "3382785086",
+        "name": "长安姑娘",
+        "singer": "李常超（Lao乾妈） / 泽国同学 / 街道办GDC/欧阳耀莹.",
+        "interval": "",
+        "isLocal": false,
+        "meta": {
+          "musicId": "3382785086",
+          "albumName": "故事止于曾经",
+          "picUrl": "https://p2.music.126.net/YmEhRPxVccR0ybs3CabMIA==/109951173214860541.jpg?param=500y500",
+          "source": "netease",
+          "_picId": "109951173214860541"
+        }
+      },
+      "name": "长安姑娘",
+      "artist": "李常超（Lao乾妈） / 泽国同学 / 街道办GDC/欧阳耀莹.",
+      "artists": [
+        {
+          "name": "李常超（Lao乾妈）"
+        },
+        {
+          "name": "泽国同学"
+        },
+        {
+          "name": "街道办GDC"
+        },
+        {
+          "name": "欧阳耀莹."
+        }
+      ],
+      "album": "故事止于曾经",
+      "cover": "https://p2.music.126.net/YmEhRPxVccR0ybs3CabMIA==/109951173214860541.jpg?param=500y500",
+      "duration": 0,
+      "fee": 0
+    },
+    "gdstudio|netease|215382": {
+      "provider": "anysource",
+      "type": "song",
+      "source": "gdstudio:netease",
+      "id": "215382",
+      "anySourceProvider": "gdstudio",
+      "anySource": "netease",
+      "anySourceLabel": "GD 网易云音乐",
+      "anySourceMusicInfo": {
+        "id": "215382",
+        "name": "雨过后的风景",
+        "singer": "Dizzy Dizzo (蔡诗芸)",
+        "interval": "",
+        "isLocal": false,
+        "meta": {
+          "musicId": "215382",
+          "albumName": "黑色彩虹",
+          "picUrl": "https://p2.music.126.net/6Y7tdO1ltV0khSYWLFHODQ==/109951173146696212.jpg?param=500y500",
+          "source": "netease",
+          "_picId": "109951173146696212"
+        }
+      },
+      "name": "雨过后的风景",
+      "artist": "Dizzy Dizzo (蔡诗芸)",
+      "artists": [
+        {
+          "name": "Dizzy Dizzo (蔡诗芸)"
+        }
+      ],
+      "album": "黑色彩虹",
+      "cover": "https://p2.music.126.net/6Y7tdO1ltV0khSYWLFHODQ==/109951173146696212.jpg?param=500y500",
+      "duration": 0,
+      "fee": 0
+    },
+    "gdstudio|joox|39rIjvMl8HO+XEHDtgsiDA==": {
+      "provider": "anysource",
+      "type": "song",
+      "source": "gdstudio:joox",
+      "id": "39rIjvMl8HO+XEHDtgsiDA==",
+      "anySourceProvider": "gdstudio",
+      "anySource": "joox",
+      "anySourceLabel": "GD JOOX",
+      "anySourceMusicInfo": {
+        "id": "39rIjvMl8HO+XEHDtgsiDA==",
+        "name": "夢中清明雨紛紛（DJ氛圍版）",
+        "singer": "Sixteen / Ameriie / Girmmmz / Zarkoz",
+        "interval": "",
+        "isLocal": false,
+        "meta": {
+          "musicId": "39rIjvMl8HO+XEHDtgsiDA==",
+          "albumName": "你與二十八宿皆回眸",
+          "picUrl": "https://image.joox.com/JOOXcover/0/b9e440a66f350e6b/500",
+          "source": "joox",
+          "_picId": "b9e440a66f350e6b"
+        }
+      },
+      "name": "夢中清明雨紛紛（DJ氛圍版）",
+      "artist": "Sixteen / Ameriie / Girmmmz / Zarkoz",
+      "artists": [
+        {
+          "name": "Sixteen"
+        },
+        {
+          "name": "Ameriie"
+        },
+        {
+          "name": "Girmmmz"
+        },
+        {
+          "name": "Zarkoz"
+        }
+      ],
+      "album": "你與二十八宿皆回眸",
+      "cover": "https://image.joox.com/JOOXcover/0/b9e440a66f350e6b/500",
+      "duration": 0,
+      "fee": 0
+    }
+  }
+}

@@ -9,11 +9,12 @@ const NO_URL_PLACEHOLDER = './gdstudio-no-url';
 const NO_PIC_PLACEHOLDER = './gdstudio-no-pic';
 
 const MAIN_API_SOURCES = new Set(['netease', 'kuwo', 'joox', 'bilibili']);
+const GD_SOURCE_IDS = ['netease', 'kuwo', 'joox', 'tencent', 'tidal', 'qobuz', 'bilibili', 'apple', 'ytmusic', 'spotify'];
 const SOURCE_LABELS = {
-  netease: 'GD 网易云',
-  kuwo: 'GD 酷我',
+  netease: 'GD 网易云音乐',
+  kuwo: 'GD 酷我音乐',
   joox: 'GD JOOX',
-  tencent: 'GD QQ',
+  tencent: 'GD QQ 音乐',
   tidal: 'GD TIDAL',
   qobuz: 'GD QOBUZ',
   bilibili: 'GD 哔哩哔哩',
@@ -419,6 +420,7 @@ async function getAnySourceLyric(song) {
 }
 
 module.exports = {
+  GD_SOURCE_IDS,
   SOURCE_LABELS,
   buildGdApiQuery,
   qualityToGdBr,

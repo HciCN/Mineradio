@@ -41,6 +41,16 @@ test('default all search does not query Any Listen sources', () => {
   assert(!allSearchBlock.includes('/api/anysource/search?source=all'));
 });
 
+test('GD search queries all Any Listen platforms together', () => {
+  const fetchMusicSearchResults = extractFunction('fetchMusicSearchResults', 'renderSongSearchResults');
+  const anySourceBlock = fetchMusicSearchResults.slice(
+    fetchMusicSearchResults.indexOf("if (mode === 'anysource')"),
+    fetchMusicSearchResults.indexOf('var result = await Promise.allSettled')
+  );
+  assert(anySourceBlock.includes('/api/anysource/search?source=all'));
+  assert(!anySourceBlock.includes('selectedGdStudioSource'));
+});
+
 test('Any Listen playback failures use Any Listen internal fallback only', () => {
   const fallbackFunction = extractFunction('tryAutoPlaybackFallback', 'handlePlaybackUnavailable');
   assert(fallbackFunction.includes("return tryAnySourcePlaybackFallback(song"));

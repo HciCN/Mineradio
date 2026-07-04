@@ -54,11 +54,13 @@ const { once } = require('events');
 const { fileURLToPath } = require('url');
 const { analyzePodcastDjStream, analyzePodcastDjIntro } = require('./dj-analyzer');
 const {
+  GD_SOURCE_IDS,
   SOURCE_LABELS: ANYSOURCE_GD_LABELS,
   searchAnySource,
   getAnySourceSongUrl,
   getAnySourceLyric,
 } = require('./anysource-gdstudio');
+const { createAnySourceLibrary } = require('./anysource-library');
 const {
   listWallpaperEngineItems,
   resolveWallpaperEngineMedia,
@@ -73,6 +75,8 @@ const UPDATE_WORK_DIR = process.env.MINERADIO_UPDATE_DIR || path.join(__dirname,
 const UPDATE_DOWNLOAD_DIR = process.env.MINERADIO_UPDATE_DOWNLOAD_DIR || path.join(UPDATE_WORK_DIR, 'downloads');
 const UPDATE_PATCH_BACKUP_DIR = process.env.MINERADIO_PATCH_BACKUP_DIR || path.join(UPDATE_WORK_DIR, 'backups', 'patches');
 const BEATMAP_CACHE_DIR = process.env.MINERADIO_BEAT_CACHE_DIR || 'D:\\MineradioCache\\beatmaps';
+const ANYSOURCE_LIBRARY_FILE = process.env.MINERADIO_ANYSOURCE_LIBRARY_FILE || path.join(__dirname, 'anysource-library.json');
+const anySourceLibrary = createAnySourceLibrary(ANYSOURCE_LIBRARY_FILE);
 const APP_PACKAGE = readPackageInfo();
 const APP_VERSION = process.env.MINERADIO_VERSION || APP_PACKAGE.version || '0.9.11';
 const UPDATE_CONFIG = readUpdateConfig(APP_PACKAGE);
@@ -3491,7 +3495,7 @@ const server = http.createServer(async (req, res) => {
     sendJSON(res, {
       provider: 'anysource',
       adapter: 'gdstudio',
-      sources: Object.keys(ANYSOURCE_GD_LABELS).map(id => ({
+      sources: GD_SOURCE_IDS.map(id => ({
         id,
         name: ANYSOURCE_GD_LABELS[id],
       })),
@@ -3506,7 +3510,7 @@ const server = http.createServer(async (req, res) => {
       const limit = Math.max(4, Math.min(20, parseInt(url.searchParams.get('limit') || '10', 10) || 10));
       let songs;
       if (source === 'all') {
-        const sources = ['kuwo', 'netease', 'joox', 'bilibili'];
+        const sources = GD_SOURCE_IDS;
         const results = await Promise.allSettled(sources.map(item => searchAnySource(kw, { source: item, limit: Math.max(4, Math.ceil(limit / 2)) })));
         const seen = new Set();
         songs = [];
@@ -3569,6 +3573,72 @@ const server = http.createServer(async (req, res) => {
       console.error('[AnySourceLyric]', err);
       sendJSON(res, { provider: 'anysource', error: err.message, lyric: '' }, 500);
     }
+    return;
+  }
+
+  if (pn === '/api/anysource/library/status') {
+    sendJSON(res, { provider: 'anysource', loggedIn: true, local: true, name: 'ANY 本地库', playlists: anySourceLibrary.listPlaylists() });
+    return;
+  }
+
+  if (pn === '/api/anysource/library/playlists') {
+    sendJSON(res, { provider: 'anysource', local: true, playlists: anySourceLibrary.listPlaylists() });
+    return;
+  }
+
+  if (pn === '/api/anysource/library/playlist/create') {
+    try {
+      const body = req.method === 'POST' ? await readRequestBody(req) : {};
+      const name = String(body.name || url.searchParams.get('name') || '').trim();
+      const playlist = anySourceLibrary.createPlaylist(name);
+      sendJSON(res, { provider: 'anysource', local: true, playlist });
+    } catch (err) {
+      sendJSON(res, { provider: 'anysource', error: err.message }, 400);
+    }
+    return;
+  }
+
+  if (pn === '/api/anysource/library/playlist/add-song') {
+    try {
+      const body = req.method === 'POST' ? await readRequestBody(req) : {};
+      const pid = body.pid || url.searchParams.get('pid') || 'heard';
+      const song = body.song || {};
+      const result = anySourceLibrary.addSongToPlaylist(pid, song);
+      sendJSON(res, { provider: 'anysource', local: true, success: true, ...result });
+    } catch (err) {
+      sendJSON(res, { provider: 'anysource', success: false, error: err.message }, 400);
+    }
+    return;
+  }
+
+  if (pn === '/api/anysource/library/playlist/delete') {
+    try {
+      const body = req.method === 'POST' ? await readRequestBody(req) : {};
+      const pid = body.pid || body.id || url.searchParams.get('pid') || url.searchParams.get('id') || '';
+      const result = anySourceLibrary.deletePlaylist(pid);
+      sendJSON(res, { provider: 'anysource', local: true, success: true, ...result });
+    } catch (err) {
+      sendJSON(res, { provider: 'anysource', success: false, error: err.message }, 400);
+    }
+    return;
+  }
+
+  if (pn === '/api/anysource/library/heard') {
+    try {
+      const body = req.method === 'POST' ? await readRequestBody(req) : {};
+      const result = anySourceLibrary.recordHeard(body.song || {});
+      sendJSON(res, { provider: 'anysource', local: true, success: true, ...result });
+    } catch (err) {
+      sendJSON(res, { provider: 'anysource', success: false, error: err.message }, 400);
+    }
+    return;
+  }
+
+  if (pn === '/api/anysource/library/playlist/tracks') {
+    const id = url.searchParams.get('id') || 'heard';
+    const playlist = anySourceLibrary.getPlaylist(id) || { id, name: 'ANY 歌单', provider: 'anysource', source: 'anysource', creator: 'ANY 本地' };
+    const tracks = anySourceLibrary.getPlaylistTracks(id);
+    sendJSON(res, { provider: 'anysource', local: true, playlist, tracks });
     return;
   }
 
