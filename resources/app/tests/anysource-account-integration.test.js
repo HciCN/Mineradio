@@ -63,3 +63,13 @@ test('ANY custom playlists expose a delete action', () => {
   assert(renderUserPlaylistsList.includes("provider === 'anysource' && pl.id !== 'heard'"));
   assert(clickHandler.includes('/api/anysource/library/playlist/delete'));
 });
+
+test('ANY playlists are first-class and first in the 3D shelf', () => {
+  const refreshUserPlaylists = extractFunction('refreshUserPlaylists', 'playlistPanelKey');
+  const makeShelfManager = extractFunction('makeShelfManager', 'safeShelfRebuild');
+  const makeContentListManager = extractFunction('makeContentListManager', 'escHtml');
+  assert(refreshUserPlaylists.includes('userPlaylists = anySourcePlaylists.concat(neteaseLists, qqPlaylists)'));
+  assert(makeShelfManager.includes("pl.provider === 'anysource' ? 'anysource'"));
+  assert(makeShelfManager.includes("(provider === 'anysource' ? 'anysource:'"));
+  assert(makeContentListManager.includes('/api/anysource/library/playlist/tracks?id='));
+});

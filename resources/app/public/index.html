@@ -13077,10 +13077,10 @@ function makeShelfManager() {
     if (hasAnyPlatformLogin() && (userPlaylists.length || myPodcastCollections.length)) {
       var source = activePlaylists();
       var items = source.map(function(pl){
-        var provider = pl.provider === 'qq' ? 'qq' : 'netease';
-        var sourceLabel = provider === 'qq' ? 'QQ' : 'NE';
+        var provider = pl.provider === 'qq' ? 'qq' : (pl.provider === 'anysource' ? 'anysource' : 'netease');
+        var sourceLabel = provider === 'qq' ? 'QQ' : (provider === 'anysource' ? 'ANY' : 'NE');
         return { type:'playlist', title: pl.name, sub:sourceLabel + ' · ' + (pl.trackCount||0)+' 首 · 播放 '+compactCount(pl.playCount||0),
-          cover: pl.cover || '', tag: pl.subscribed ? '收藏歌单' : '我的歌单', playlistId: (provider === 'qq' ? 'qq:' : '') + pl.id, provider: provider };
+          cover: pl.cover || '', tag: provider === 'anysource' ? 'ANY 本地歌单' : (pl.subscribed ? '收藏歌单' : '我的歌单'), playlistId: (provider === 'qq' ? 'qq:' : (provider === 'anysource' ? 'anysource:' : '')) + pl.id, provider: provider };
       });
       if (shelfShowsPodcasts() && (shelfPane === 'mine' || shelfMergesCollections()) && myPodcastCollections.length) {
         myPodcastCollections.forEach(function(pc){
@@ -14467,13 +14467,16 @@ function makeContentListManager() {
       }
       var podcastCollectionKey = String(playlistId || '').indexOf('podcast:') === 0 ? String(playlistId).slice(8) : '';
       var qqPlaylistId = String(playlistId || '').indexOf('qq:') === 0 ? String(playlistId).slice(3) : '';
+      var anysourcePlaylistId = String(playlistId || '').indexOf('anysource:') === 0 ? String(playlistId).slice(10) : '';
       contentKind = podcastCollectionKey ? 'podcast' : 'playlist';
       // 拉取歌单/播客集合
       var r = null;
       try {
         r = podcastCollectionKey
           ? await apiJson('/api/podcast/my/items?key=' + encodeURIComponent(podcastCollectionKey) + '&limit=36')
-          : (qqPlaylistId
+          : (anysourcePlaylistId
+            ? await apiJson('/api/anysource/library/playlist/tracks?id=' + encodeURIComponent(anysourcePlaylistId))
+            : qqPlaylistId
             ? await apiJson('/api/qq/playlist/tracks?id=' + encodeURIComponent(qqPlaylistId))
             : await apiJson('/api/playlist/tracks?id=' + encodeURIComponent(playlistId)));
       } catch (e) {
@@ -17006,7 +17009,7 @@ function recordAnySourceHeard(song) {
       anySourcePlaylists = anySourcePlaylists.map(function(pl){ return pl.id === r.playlist.id ? r.playlist : pl; });
       if (!anySourcePlaylists.some(function(pl){ return pl.id === r.playlist.id; })) anySourcePlaylists.unshift(r.playlist);
       userPlaylists = userPlaylists.map(function(pl){ return pl.provider === 'anysource' && pl.id === r.playlist.id ? r.playlist : pl; });
-      if (!userPlaylists.some(function(pl){ return pl.provider === 'anysource' && pl.id === r.playlist.id; })) userPlaylists.push(r.playlist);
+      if (!userPlaylists.some(function(pl){ return pl.provider === 'anysource' && pl.id === r.playlist.id; })) userPlaylists.unshift(r.playlist);
     }
   }).catch(function(err){ console.warn('[AnySourceHeard]', err); });
 }
@@ -19704,7 +19707,7 @@ async function refreshUserPlaylists(force) {
     var neteaseLists = (result[0].playlists || []).map(function(pl){ pl.provider = 'netease'; pl.source = 'netease'; return pl; });
     qqPlaylists = (result[2].playlists || []).map(function(pl){ pl.provider = 'qq'; pl.source = 'qq'; return pl; });
     anySourcePlaylists = (result[3].playlists || []).map(function(pl){ pl.provider = 'anysource'; pl.source = 'anysource'; return pl; });
-    userPlaylists = neteaseLists.concat(qqPlaylists, anySourcePlaylists);
+    userPlaylists = anySourcePlaylists.concat(neteaseLists, qqPlaylists);
     myPodcastCollections = result[1].collections || [];
     var animatePanel = isPlaylistPanelVisibleForRender();
     renderUserPlaylistsList({ animate: animatePanel, reset: true });
